@@ -1,6 +1,7 @@
 import React from 'react'
 import { Content } from "./components/Content";
 import { Header } from "./components/Header";
+import { Total } from "./components/Total";
 
 import './App.css';
 
@@ -23,6 +24,11 @@ function App() {
         name: 'State of a component',
         exercises: 14,
         id: 3
+      },
+      {
+        name: 'Redux',
+        exercises: 11,
+        id: 4
       }
     ]
   }
@@ -30,6 +36,7 @@ function App() {
     <div className="App">
       <Header name={course.name}></Header>
       <Content parts={course.parts}></Content>
+      <Total total={course.parts}></Total>
     </div>
   );
 }
