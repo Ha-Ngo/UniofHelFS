@@ -1,5 +1,9 @@
 import React, { useState } from "react";
 
+import { Filter } from "./components/Filter";
+import { PersonForm } from "./components/PersonForm";
+import { Persons } from "./components/Persons";
+
 function App() {
   const [persons, setPersons] = useState([
     { name: "Arto Hellas", number: "040-123456" },
@@ -20,9 +24,9 @@ function App() {
   };
 
   const handleSearch = (event) => {
-    setSearchTerm(event.target.value)
-  }
-  
+    setSearchTerm(event.target.value);
+  };
+
   const addPerson = (event) => {
     event.preventDefault();
     if (persons.map((person) => person.name).includes(newName))
@@ -37,33 +41,26 @@ function App() {
     setNewNumber("");
   };
 
-  const personToShow = searchTerm ? persons.filter((person) => person.name.toLowerCase().includes(searchTerm.toLowerCase())) : persons
+  const personToShow = searchTerm
+    ? persons.filter((person) =>
+        person.name.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : persons;
 
   return (
     <div>
       <h2>Phonebook</h2>
-      <div>
-        filter shown with <input onChange={handleSearch} value={searchTerm}></input>
-      </div>
-      <form onSubmit={addPerson}>
-        <div>
-          name: <input onChange={handleNameChange} value={newName} />
-        </div>
-        <div>
-          number: <input onChange={handleNumberChange} value={newNumber} />
-        </div>
-        <div>
-          <button type="submit">add</button>
-        </div>
-      </form>
+      <Filter handleSearch={handleSearch} searchTerm={searchTerm}></Filter>
+      <h3>Add a new</h3>
+      <PersonForm
+        handleNameChange={handleNameChange}
+        handleNumberChange={handleNumberChange}
+        newName={newName}
+        newNumber={newNumber}
+        addPerson={addPerson}
+      ></PersonForm>
       <h2>Numbers</h2>
-      <ul>
-        {personToShow.map((person) => (
-          <li key={person.name}>
-            {person.name} {person.number}
-          </li>
-        ))}
-      </ul>
+      <Persons personToShow={personToShow}></Persons>
     </div>
   );
 }
