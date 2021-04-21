@@ -9,6 +9,7 @@ export const Persons = ({ personToShow }) => {
           key={person.name}
           name={person.name}
           number={person.number}
+          id={person.id}
         ></Person>
       ))}
     </div>
