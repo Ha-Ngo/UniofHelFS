@@ -9,6 +9,9 @@ const create = (newObject) => {
   return axios.post(baseURL, newObject);
 };
 
-const personService = {getAll, create}
+const update = (id, newObject) => {
+    return axios.put(`${baseURL}/${id}`, newObject)
+}
+const personService = {getAll, create, update}
 
 export default personService
