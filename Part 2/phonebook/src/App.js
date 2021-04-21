@@ -15,7 +15,7 @@ function App() {
     axios
       .get("http://localhost:3001/persons")
       .then((res) => setPersons(res.data));
-  });
+  },[]);
 
   const handleNameChange = (event) => {
     setNewName(event.target.value);
@@ -37,10 +37,11 @@ function App() {
       name: newName,
       number: newNumber,
     };
-
-    setPersons(persons.concat(personObject));
-    setNewName("");
-    setNewNumber("");
+    axios.post("http://localhost:3001/persons", personObject).then((res) => {
+      setPersons(persons.concat(res.data));
+      setNewName("");
+      setNewNumber("");
+    });
   };
 
   const personToShow = searchTerm

@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
+import { SingleCountry } from "./components/SingleCountry";
+
 function App() {
   const [countries, setCountries] = useState([]);
   const [countriesToShow, setCountriesToShow] = useState([]);
+  const [filterCountry, setFilterCountry] = useState(" ")
 
   useEffect(() => {
     axios
@@ -11,13 +14,22 @@ function App() {
       .then((res) => setCountries(res.data));
   }, []);
 
+  
   const handleChange = (event) => {
     const show = countries.filter((country) =>
       country.name.toLowerCase().includes(event.target.value.toLowerCase())
     );
     setCountriesToShow(show);
+    console.log(`event value: ${event.target.value}`)
+    setFilterCountry(event.target.value)
+    console.log(`value: ${filterCountry}`)
   };
 
+  const handleClick = (name) => {
+    setFilterCountry(name)
+  };
+
+  console.log(`event value 1: ${filterCountry}`)
   return (
     <div className="App">
       <p>find country</p>
@@ -25,27 +37,16 @@ function App() {
       {countriesToShow.length > 10 ? (
         <p>Too many matches, specify another filter</p>
       ) : countriesToShow.length === 1 ? (
-        <div>
-          <h1>{countriesToShow[0].name}</h1>
-          <p>capital {countriesToShow[0].capital}</p>
-          <p>population {countriesToShow[0].population}</p>
-          <h4>languages</h4>
-          <ul>
-            {countriesToShow[0].languages.map((language) => (
-              <li key={language.iso639_1}>{language.name}</li>
-            ))}
-          </ul>
-          <img
-            src={countriesToShow[0].flag}
-            alt="countryflag"
-            width="200px"
-            height="200px"
-          ></img>
-        </div>
+        <SingleCountry country={countriesToShow[0]}></SingleCountry>
       ) : (
         <ul>
           {countriesToShow.map((country) => (
-            <li key={country.name}>{country.name}</li>
+            <li key={country.name}>
+              {country.name}{" "}
+              <a href={`/${country.name}`}>
+                <button onClick={() => handleClick(country.name)}>show</button>
+              </a>
+            </li>
           ))}
         </ul>
       )}
