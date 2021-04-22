@@ -59,11 +59,21 @@ app.delete("/api/persons/:id", (request, response) => {
 app.post("/api/persons", (request, response) => {
   const maxId =
     persons.length > 0 ? Math.max(...persons.map((person) => person.id)) : 0;
-    const person = request.body
-    person.id = maxId + 1
+  const newPerson = request.body;
+  if (!newPerson.name || !newPerson.number) {
+    return response.status(400).json({ error: "content missing" });
+  }
 
-    persons = persons.concat(person)
-    response.json(person)
+  const isExist = persons
+    .map((person) => person.name)
+    .includes(`${newPerson.name}`);
+  if (isExist) {
+    return response.status(400).json({ error: "name must be unique" });
+  }
+  newPerson.id = maxId + 1;
+
+  persons = persons.concat(newPerson);
+  response.json(newPerson);
 });
 
 const PORT = 3001;
