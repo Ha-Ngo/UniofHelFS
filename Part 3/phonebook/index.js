@@ -1,3 +1,4 @@
+const { request, response } = require("express");
 const express = require("express");
 const app = express();
 
@@ -24,6 +25,8 @@ let persons = [
   },
 ];
 
+app.use(express.json());
+
 app.get("/api/persons", (request, response) => {
   response.json(persons);
 });
@@ -34,6 +37,33 @@ app.get("/info", (request, response) => {
   response.send(
     `<div><p>Phonebook has infor for ${entries} people<p> <p>${date}</p></div>`
   );
+});
+
+app.get("/api/persons/:id", (request, response) => {
+  const id = request.params.id;
+  const person = persons.find((person) => person.id == id);
+  if (person) {
+    response.json(person);
+  } else {
+    response.status(404).end();
+  }
+});
+
+app.delete("/api/persons/:id", (request, response) => {
+  const id = Number(request.params.id);
+  persons = persons.filter((person) => persons.id !== id);
+
+  response.status(204).end();
+});
+
+app.post("/api/persons", (request, response) => {
+  const maxId =
+    persons.length > 0 ? Math.max(...persons.map((person) => person.id)) : 0;
+    const person = request.body
+    person.id = maxId + 1
+
+    persons = persons.concat(person)
+    response.json(person)
 });
 
 const PORT = 3001;
