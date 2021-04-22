@@ -26,8 +26,16 @@ let persons = [
   },
 ];
 
+morgan.token('body',(request, response) => {
+    if(request.method === 'POST') {
+        return JSON.stringify(request.body)
+    } else {
+        return null
+    }
+} )
+
 app.use(express.json());
-app.use(morgan('tiny'))
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
 app.get("/api/persons", (request, response) => {
   response.json(persons);
@@ -61,7 +69,7 @@ app.delete("/api/persons/:id", (request, response) => {
 app.post("/api/persons", (request, response) => {
   const maxId =
     persons.length > 0 ? Math.max(...persons.map((person) => person.id)) : 0;
-  const newPerson = request.body;
+  const newPerson = {...request.body};
   if (!newPerson.name || !newPerson.number) {
     return response.status(400).json({ error: "content missing" });
   }
