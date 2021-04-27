@@ -6,7 +6,7 @@ import { SingleCountry } from "./components/SingleCountry";
 function App() {
   const [countries, setCountries] = useState([]);
   const [countriesToShow, setCountriesToShow] = useState([]);
-  const [filterCountry, setFilterCountry] = useState(" ")
+  const [filterCountry, setFilterCountry] = useState("");
 
   useEffect(() => {
     axios
@@ -14,26 +14,28 @@ function App() {
       .then((res) => setCountries(res.data));
   }, []);
 
-  
   const handleChange = (event) => {
-    const show = countries.filter((country) =>
-      country.name.toLowerCase().includes(event.target.value.toLowerCase())
-    );
-    setCountriesToShow(show);
-    console.log(`event value: ${event.target.value}`)
-    setFilterCountry(event.target.value)
-    console.log(`value: ${filterCountry}`)
+    setFilterCountry(event.target.value);
   };
 
   const handleClick = (name) => {
-    setFilterCountry(name)
+    setFilterCountry(name);
   };
 
-  console.log(`event value 1: ${filterCountry}`)
+  useEffect(() => {
+    if (countries !== [] && filterCountry !== "") {
+      const show = countries.filter((country) =>
+        country.name.toLowerCase().includes(filterCountry.toLowerCase())
+      );
+      setCountriesToShow(show);
+      console.log(`filter country ${filterCountry}`);
+    }
+  }, [filterCountry, countries]);
+
   return (
     <div className="App">
       <p>find country</p>
-      <input type="text" onChange={handleChange}></input>
+      <input type="text" onChange={handleChange} value={filterCountry}></input>
       {countriesToShow.length > 10 ? (
         <p>Too many matches, specify another filter</p>
       ) : countriesToShow.length === 1 ? (
@@ -43,9 +45,7 @@ function App() {
           {countriesToShow.map((country) => (
             <li key={country.name}>
               {country.name}{" "}
-              <a href={`/${country.name}`}>
-                <button onClick={() => handleClick(country.name)}>show</button>
-              </a>
+              <button onClick={() => handleClick(country.name)}>show</button>
             </li>
           ))}
         </ul>
