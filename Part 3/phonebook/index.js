@@ -1,8 +1,42 @@
+require("dotenv").config()
 const { request, response } = require("express");
 const express = require("express");
-const morgan = require('morgan')
-const cors = require('cors')
+const morgan = require("morgan");
+const cors = require("cors");
+const mongoose = require("mongoose");
+
 const app = express();
+
+const url = process.env.MONGODB_URI;
+
+mongoose
+  .connect(url, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false,
+    useCreateIndex: true,
+  })
+  .then((result) => {
+    console.log("connect to mongodb");
+  })
+  .catch((err) => {
+    console.log("error connectiong to mongodb:", err.message);
+  });
+
+const personSchema = new mongoose.Schema({
+  name: String,
+  number: String,
+});
+
+personSchema.set('toJSON', {
+  transform: (document, returnedObject) => {
+    returnedObject.id = returnedObject._id.toString()
+    delete returnedObject._id
+    delete returnedObject.__v
+  }
+})
+
+const Person = mongoose.model("Person", personSchema);
 
 let persons = [
   {
@@ -27,21 +61,26 @@ let persons = [
   },
 ];
 
-morgan.token('body',(request, response) => {
-    if(request.method === 'POST') {
-        return JSON.stringify(request.body)
-    } else {
-        return null
-    }
-} )
+morgan.token("body", (request, response) => {
+  if (request.method === "POST") {
+    return JSON.stringify(request.body);
+  } else {
+    return null;
+  }
+});
 
 app.use(express.json());
-app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
-app.use(cors())
-app.use(express.static('build'))
+app.use(
+  morgan(":method :url :status :res[content-length] - :response-time ms :body")
+);
+app.use(cors());
+app.use(express.static("build"));
 
 app.get("/api/persons", (request, response) => {
-  response.json(persons);
+  // response.json(persons);
+  Person.find({}).then(persons => {
+    response.json(persons)
+  })
 });
 
 app.get("/info", (request, response) => {
@@ -71,7 +110,7 @@ app.delete("/api/persons/:id", (request, response) => {
 app.post("/api/persons", (request, response) => {
   const maxId =
     persons.length > 0 ? Math.max(...persons.map((person) => person.id)) : 0;
-  const newPerson = {...request.body};
+  const newPerson = { ...request.body };
   if (!newPerson.name || !newPerson.number) {
     return response.status(400).json({ error: "content missing" });
   }
