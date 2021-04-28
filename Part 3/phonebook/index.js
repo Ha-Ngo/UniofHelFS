@@ -1,42 +1,11 @@
-require("dotenv").config()
+require("dotenv").config();
 const { request, response } = require("express");
 const express = require("express");
 const morgan = require("morgan");
 const cors = require("cors");
-const mongoose = require("mongoose");
+const Person = require("./models/person");
 
 const app = express();
-
-const url = process.env.MONGODB_URI;
-
-mongoose
-  .connect(url, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useFindAndModify: false,
-    useCreateIndex: true,
-  })
-  .then((result) => {
-    console.log("connect to mongodb");
-  })
-  .catch((err) => {
-    console.log("error connectiong to mongodb:", err.message);
-  });
-
-const personSchema = new mongoose.Schema({
-  name: String,
-  number: String,
-});
-
-personSchema.set('toJSON', {
-  transform: (document, returnedObject) => {
-    returnedObject.id = returnedObject._id.toString()
-    delete returnedObject._id
-    delete returnedObject.__v
-  }
-})
-
-const Person = mongoose.model("Person", personSchema);
 
 let persons = [
   {
@@ -78,9 +47,9 @@ app.use(express.static("build"));
 
 app.get("/api/persons", (request, response) => {
   // response.json(persons);
-  Person.find({}).then(persons => {
-    response.json(persons)
-  })
+  Person.find({}).then((persons) => {
+    response.json(persons);
+  });
 });
 
 app.get("/info", (request, response) => {
@@ -108,24 +77,39 @@ app.delete("/api/persons/:id", (request, response) => {
 });
 
 app.post("/api/persons", (request, response) => {
-  const maxId =
-    persons.length > 0 ? Math.max(...persons.map((person) => person.id)) : 0;
+  // const maxId =
+  //   persons.length > 0 ? Math.max(...persons.map((person) => person.id)) : 0;
+  // const newPerson = { ...request.body };
+  // if (!newPerson.name || !newPerson.number) {
+  //   return response.status(400).json({ error: "content missing" });
+  // }
+
+  // const isExist = persons
+  //   .map((person) => person.name)
+  //   .includes(`${newPerson.name}`);
+  // if (isExist) {
+  //   return response.status(400).json({ error: "name must be unique" });
+  // }
+  // newPerson.id = maxId + 1;
+
+  // persons = persons.concat(newPerson);
+  // response.json(newPerson);
   const newPerson = { ...request.body };
   if (!newPerson.name || !newPerson.number) {
     return response.status(400).json({ error: "content missing" });
   }
 
-  const isExist = persons
-    .map((person) => person.name)
-    .includes(`${newPerson.name}`);
-  if (isExist) {
-    return response.status(400).json({ error: "name must be unique" });
-  }
-  newPerson.id = maxId + 1;
+  const addPerson = new Person({
+    name: newPerson.name,
+    number: newPerson.number,
+  });
 
-  persons = persons.concat(newPerson);
-  response.json(newPerson);
+  addPerson.save().then(savedPerson => {
+    response.json(savedPerson)
+  })
+
+  const person = new Person({});
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT;
 app.listen(PORT, () => console.log(`Server is running on ${PORT}`));
