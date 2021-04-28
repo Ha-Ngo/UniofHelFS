@@ -21,6 +21,7 @@
     "server": "json-server -p3001 --watch db.json"
   },
   "proxy": "http://localhost:3001",
+  "secure":false,
   "eslintConfig": {
     "extends": [
       "react-app",
