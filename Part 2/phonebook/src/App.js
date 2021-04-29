@@ -57,7 +57,8 @@ function App() {
             setNewNumber("");
           })
           .catch((error) => {
-            setErrorMessage(`${newName} has already been removed from server`);
+            // setErrorMessage(`${newName} has already been removed from server`);
+            setErrorMessage(`${error.response.data.error} `);
             setTimeout(() => {
               setErrorMessage(null);
             }, 3000);
@@ -78,7 +79,20 @@ function App() {
       }, 3000);
       setNewName("");
       setNewNumber("");
+    }).catch(error => {
+      // console.log(error.response.data.error)
+      setErrorMessage(`${error.response.data.error} `);
+      setTimeout(() => {
+        setErrorMessage(null);
+      }, 3000);
     });
+  };
+
+  const handleClick = (id, name) => {
+    if (window.confirm(`Delete ${name}?`)) {
+      personService.remove(id);
+      setPersons(persons.filter((person) => person.id !== id))
+    }
   };
 
   const personToShow = searchTerm
@@ -102,7 +116,7 @@ function App() {
         addPerson={addPerson}
       ></PersonForm>
       <h2>Numbers</h2>
-      <Persons personToShow={personToShow}></Persons>
+      <Persons personToShow={personToShow} handleClick={handleClick}></Persons>
     </div>
   );
 }

@@ -71,14 +71,14 @@ app.get("/api/persons/:id", (request, response) => {
   //   response.status(404).end();
   // }
   Person.findById(request.params.id)
-  .then(person => {
-    if (person) {
-      response.json(person)
-    } else {
-      response.status(404).end()
-    }
-  })
-  .catch(err => next(err))
+    .then((person) => {
+      if (person) {
+        response.json(person);
+      } else {
+        response.status(404).end();
+      }
+    })
+    .catch((err) => next(err));
 });
 
 app.delete("/api/persons/:id", (request, response, next) => {
@@ -86,13 +86,13 @@ app.delete("/api/persons/:id", (request, response, next) => {
   // persons = persons.filter((person) => persons.id !== id);
   // response.status(204).end();
   Person.findByIdAndRemove(request.params.id)
-  .then(result => {
-    response.status(404).end()
-  })
-  .catch(err => next(err))
+    .then((result) => {
+      response.status(404).end();
+    })
+    .catch((err) => next(err));
 });
 
-app.post("/api/persons", (request, response) => {
+app.post("/api/persons", (request, response, next) => {
   // const maxId =
   //   persons.length > 0 ? Math.max(...persons.map((person) => person.id)) : 0;
   // const newPerson = { ...request.body };
@@ -112,45 +112,49 @@ app.post("/api/persons", (request, response) => {
   // response.json(newPerson);
 
   const newPerson = { ...request.body };
-  if (!newPerson.name || !newPerson.number) {
-    return response.status(400).json({ error: "content missing" });
-  }
+  // if (!newPerson.name || !newPerson.number) {
+  //   return response.status(400).json({ error: "content missing" });
+  // }
 
   const addPerson = new Person({
     name: newPerson.name,
     number: newPerson.number,
   });
 
-  addPerson.save().then((savedPerson) => {
-    response.json(savedPerson);
-  });
-
-  const person = new Person({});
+  addPerson
+    .save()
+    .then((savedPerson) => {
+      response.json(savedPerson);
+    })
+    .catch((error) => next(error));
 });
 
-app.put('/api/persons/:id', (request, response, next) => {
+app.put("/api/persons/:id", (request, response, next) => {
+  console.log(request.body)
   const newPerson = { ...request.body };
   const editPerson = {
-    number: newPerson.number
-  }
+    number: newPerson.number,
+  };
 
-  Person.findByIdAndUpdate(request.params.id, editPerson, {new:true})
-  .then(updatedPerson => {
-    response.json(updatedPerson)
-  })
-  .catch(err => next(err))
-})
+  Person.findByIdAndUpdate(request.params.id, editPerson, { runValidators: true, new: true })
+    .then((updatedPerson) => {
+      response.json(updatedPerson);
+    })
+    .catch((err) => next(err));
+});
 
 const errorHandler = (error, request, response, next) => {
-  console.log(error.message)
+  console.log(error.message);
 
-  if (ErrorEvent.name === 'CastError') {
-    return response.status(400).send({erroe: 'malformatted id'})
+  if (error.name === "CastError") {
+    return response.status(400).send({ error: "malformatted id" });
+  } else if (error.name === "ValidationError") {
+    return response.status(400).json({ error: error.message });
   }
-  next(error)
-}
+  next(error);
+};
 
-app.use(errorHandler)
+app.use(errorHandler);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => console.log(`Server is running on ${PORT}`));
